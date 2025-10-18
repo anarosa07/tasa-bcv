@@ -8,7 +8,7 @@ export default function BCVCalculator() {
   const [updating, setUpdating] = useState(false);
   const [unidades, setUnidades] = useState(30);
 
-  // 🔹 Cargar datos BCV
+  
   const cargarDatos = async (isInitial = false) => {
     if (!isInitial) setUpdating(true);
     try {
@@ -29,21 +29,7 @@ export default function BCVCalculator() {
     cargarDatos(true);
   }, []);
 
-  // 🔹 Imprimir sin encabezado/pie de navegador
   const handlePrint = () => {
-    const style = document.createElement("style");
-    style.media = "print";
-    style.innerHTML = `
-      @page {
-        size: auto;
-        margin: 8mm;
-      }
-      body::before, body::after {
-        display: none !important;
-        content: none !important;
-      }
-    `;
-    document.head.appendChild(style);
     window.print();
   };
 
@@ -52,7 +38,7 @@ export default function BCVCalculator() {
     return (i * tasaUSD).toFixed(2);
   };
 
-  // 🔹 Crear 3 columnas verticales
+  
   const columnas = 3;
   const filas = Math.ceil(unidades / columnas);
   const columnasDatos = Array.from({ length: columnas }, (_, col) =>
@@ -62,7 +48,6 @@ export default function BCVCalculator() {
     }).filter(Boolean)
   );
 
-  // 🔹 Mostrar spinner antes de renderizar contenido
   if (loading) {
     return (
       <div
@@ -105,6 +90,7 @@ export default function BCVCalculator() {
 
   return (
     <div
+      className="print-container"
       style={{
         padding: "30px",
         maxWidth: "1000px",
@@ -112,14 +98,22 @@ export default function BCVCalculator() {
         fontFamily: "Arial, sans-serif",
         backgroundColor: "#fff",
         color: "#000",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
       }}
     >
       {/* ENCABEZADO */}
       <div
+        className="print-header"
         style={{
           textAlign: "center",
           paddingBottom: "10px",
           marginBottom: "10px",
+          width: "100%",
+          maxWidth: "1000px",
+          boxSizing: "border-box",
         }}
       >
         <p style={{ fontSize: "34px", margin: "10px 0" }}>
@@ -132,7 +126,7 @@ export default function BCVCalculator() {
           <strong>Fecha:</strong> {fecha || "—"}
         </p>
 
-        {/* BOTONES */}
+        {/* BOTONES (no se imprimen) */}
         <div className="no-print" style={{ marginTop: "20px" }}>
           <button
             onClick={() => cargarDatos()}
@@ -168,26 +162,30 @@ export default function BCVCalculator() {
         </div>
       </div>
 
-      {/* CUERPO EN 3 COLUMNAS VERTICALES */}
+      {/* CUERPO EN 3 COLUMNAS */}
       <div
+        className="print-columns"
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          gap: "24px", 
+          justifyContent: "center",
           alignItems: "flex-start",
           fontSize: "34px",
           fontWeight: "bold",
           lineHeight: "1.8",
-          pageBreakInside: "avoid",
           color: "#000",
+          width: "100%",
+          boxSizing: "border-box",
+          maxWidth: "1000px",
         }}
       >
         {columnasDatos.map((col, colIndex) => (
           <div
             key={colIndex}
             style={{
-              width: "32%",
+              flex: "1 1 0",
+              minWidth: "120px", 
               textAlign: "center",
-              color: "#000",
             }}
           >
             {col.map((num) => (
@@ -199,12 +197,60 @@ export default function BCVCalculator() {
         ))}
       </div>
 
-      {/* ESTILOS IMPRESIÓN */}
+      {/* ESTILOS DE IMPRESIÓN */}
       <style jsx>{`
         @media print {
           .no-print {
             display: none !important;
           }
+
+         
+          @page {
+            size: auto;
+            margin: 8mm;
+          }
+
+         
+          .print-container {
+            min-height: 100vh;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 8mm !important;
+            box-sizing: border-box;
+            background: #fff;
+          }
+
+         
+          .print-header {
+            width: 100%;
+            max-width: 1000px;
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 8mm;
+          }
+
+         
+          .print-columns {
+            display: flex;
+            gap: 18mm;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1000px;
+            box-sizing: border-box;
+            font-size: 32px;
+            line-height: 1.6;
+          }
+          .print-columns > div {
+            flex: 1 1 0;
+            min-width: 110px;
+            box-sizing: border-box;
+          }
+
+         
+          html,
           body {
             background: #fff !important;
             color: #000 !important;
@@ -213,8 +259,10 @@ export default function BCVCalculator() {
             margin: 0 !important;
             padding: 0 !important;
           }
-          @page {
-            margin: 8mm !important;
+
+         
+          .print-columns > div {
+            page-break-inside: avoid;
           }
         }
       `}</style>
